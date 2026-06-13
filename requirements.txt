@@ -1,0 +1,20 @@
+# Watch It - LINE Bot 第二階段依賴
+# Python 3.10+
+
+# Web 框架
+flask==3.1.3
+
+# LINE Messaging API SDK（v3 為目前官方維護版本）
+line-bot-sdk==3.23.0
+
+# 環境變數載入
+python-dotenv==1.2.2
+
+# ORM 與資料庫
+sqlalchemy==2.0.50
+
+# 測試
+pytest==9.0.3
+
+# 正式環境 WSGI 伺服器（本機開發可選用；ngrok 測試時 Flask 內建伺服器即可）
+gunicorn==26.0.0

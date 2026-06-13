@@ -1,0 +1,23 @@
+# 環境變數（含敏感憑證，切勿提交）
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# 作業系統
+.DS_Store
+Thumbs.db
+
+# SQLite 資料庫
+watchit.db
