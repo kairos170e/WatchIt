@@ -38,6 +38,19 @@ def _fetch_price_internal(stock_code: str) -> dict | None:
     is_realtime = True
     final_price_str = latest_price_str
 
+    from datetime import datetime
+    try:
+        from zoneinfo import ZoneInfo
+    except ImportError:
+        from backports.zoneinfo import ZoneInfo
+    
+    # 檢查 time_str 是否為今天的日期 (例如 time_str 是 '2024-05-13 13:30:00')
+    if time_str:
+        today_str = datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y-%m-%d")
+        if not time_str.startswith(today_str):
+            logger.info(f"股票 {stock_code} 回傳時間 ({time_str}) 非今日，標記為歷史快照。")
+            is_realtime = False
+
     if final_price_str == "-" or not final_price_str:
         logger.info(f"股票 {stock_code} 無即時報價，嘗試降級抓取歷史收盤價。")
         is_realtime = False

@@ -57,6 +57,29 @@ line_configuration = Configuration(access_token=Config.LINE_CHANNEL_ACCESS_TOKEN
 # Webhook 事件解析器（Channel Secret 用於驗證請求簽章）
 handler = WebhookHandler(Config.LINE_CHANNEL_SECRET)
 
+# ---------------------------------------------------------------------------
+# 排程器初始化 (加入 reloader 防護)
+# ---------------------------------------------------------------------------
+import os
+import atexit
+from commands.scheduler import start_scheduler, shutdown_scheduler
+
+# 在 debug 模式下，Flask 會啟動主進程與 reloader 子進程。
+# 檢查 WERKZEUG_RUN_MAIN 確保我們只在子進程（實際跑 app 的進程）啟動排程器，避免重複推播。
+# 若非 debug 模式（例如正式機用 gunicorn），則直接啟動。
+if not Config.FLASK_DEBUG or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+    # 建立排程器專用的 ApiClient
+    scheduler_api_client = ApiClient(line_configuration)
+    scheduler_messaging_api = MessagingApi(scheduler_api_client)
+    
+    start_scheduler(scheduler_messaging_api, interval_minutes=5)
+    
+    # 註冊離開時的清理工作
+    atexit.register(shutdown_scheduler)
+    atexit.register(scheduler_api_client.close)
+
+
+
 
 @app.route("/", methods=["GET"])
 def health_check() -> tuple[str, int]:

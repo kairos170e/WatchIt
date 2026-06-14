@@ -15,12 +15,20 @@ class TestPriceFetcher:
     @patch("commands.price_fetcher.twstock")
     def test_get_stock_price_success_realtime(self, mock_twstock):
         """測試正常抓取即時資料"""
+        from datetime import datetime
+        try:
+            from zoneinfo import ZoneInfo
+        except ImportError:
+            from backports.zoneinfo import ZoneInfo
+        today_str = datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y-%m-%d")
+        mock_time_str = f"{today_str} 14:30:00"
+
         mock_twstock.realtime.get.return_value = {
             "success": True,
             "info": {
                 "code": "2330",
                 "name": "台積電",
-                "time": "2026-06-12 14:30:00"
+                "time": mock_time_str
             },
             "realtime": {
                 "latest_trade_price": "1050.50"
@@ -33,8 +41,34 @@ class TestPriceFetcher:
         assert result["code"] == "2330"
         assert result["name"] == "台積電"
         assert result["price"] == Decimal("1050.50")
-        assert result["time"] == "2026-06-12 14:30:00"
+        assert result["time"] == mock_time_str
         assert result["is_realtime"] is True
+        mock_twstock.realtime.get.assert_called_once_with("2330")
+        mock_twstock.Stock.assert_not_called()
+
+    @patch("commands.price_fetcher.twstock")
+    def test_get_stock_price_stale_snapshot(self, mock_twstock):
+        """測試盤後拿到昨天快照（時間戳非今日）"""
+        mock_twstock.realtime.get.return_value = {
+            "success": True,
+            "info": {
+                "code": "2330",
+                "name": "台積電",
+                "time": "1999-01-01 13:30:00"  # 絕對不是今天
+            },
+            "realtime": {
+                "latest_trade_price": "1050.50"
+            }
+        }
+
+        result = get_stock_price("2330")
+
+        assert result is not None
+        assert result["code"] == "2330"
+        assert result["name"] == "台積電"
+        assert result["price"] == Decimal("1050.50")
+        assert result["time"] == "1999-01-01 13:30:00"
+        assert result["is_realtime"] is False
         mock_twstock.realtime.get.assert_called_once_with("2330")
         mock_twstock.Stock.assert_not_called()
 
