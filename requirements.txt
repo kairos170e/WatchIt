@@ -18,3 +18,7 @@ pytest==9.0.3
 
 # 正式環境 WSGI 伺服器（本機開發可選用；ngrok 測試時 Flask 內建伺服器即可）
 gunicorn==26.0.0
+
+# 股價抓取模組
+twstock==1.5.1
+lxml==6.1.1
