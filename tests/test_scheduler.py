@@ -2,6 +2,7 @@
 測試排程器邏輯
 """
 
+import os
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
@@ -19,6 +20,17 @@ class TestScheduler:
         with patch("commands.scheduler.get_session") as mock_db:
             check_alerts_job(mock_api)
             mock_db.assert_not_called()
+
+    @patch("commands.scheduler.is_market_open")
+    def test_force_market_open_bypass_market_closed(self, mock_is_market_open):
+        """測試設定 FORCE_MARKET_OPEN=true 時，即使非交易時段也會繼續執行"""
+        mock_is_market_open.return_value = False
+        mock_api = MagicMock()
+        
+        with patch.dict(os.environ, {"FORCE_MARKET_OPEN": "true"}):
+            with patch("commands.scheduler.get_session") as mock_db:
+                check_alerts_job(mock_api)
+                mock_db.assert_called_once()
 
     @patch("commands.scheduler.time.sleep")
     @patch("commands.scheduler.is_market_open")

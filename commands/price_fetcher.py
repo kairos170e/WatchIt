@@ -50,6 +50,11 @@ def _fetch_price_internal(stock_code: str) -> dict | None:
         if not time_str.startswith(today_str):
             logger.info(f"股票 {stock_code} 回傳時間 ({time_str}) 非今日，標記為歷史快照。")
             is_realtime = False
+        else:
+            from commands.market_hours import is_market_open
+            if not is_market_open():
+                logger.info(f"股票 {stock_code} 回傳時間為今日，但目前非交易時段，標記為歷史快照。")
+                is_realtime = False
 
     if final_price_str == "-" or not final_price_str:
         logger.info(f"股票 {stock_code} 無即時報價，嘗試降級抓取歷史收盤價。")

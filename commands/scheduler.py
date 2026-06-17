@@ -5,6 +5,7 @@
 """
 
 import logging
+import os
 import time
 from collections import defaultdict
 
@@ -26,7 +27,9 @@ def check_alerts_job(messaging_api: MessagingApi):
     """
     排程執行的主要檢查工作。
     """
-    if not is_market_open():
+    if os.environ.get("FORCE_MARKET_OPEN") == "true":
+        logger.info("測試模式：強制繞過時段判斷")
+    elif not is_market_open():
         logger.info("非交易時段，略過警示檢查。")
         return
 
