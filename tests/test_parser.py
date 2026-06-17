@@ -44,6 +44,10 @@ class TestParseCommand:
         assert cmd.type == CommandType.ADD_WATCH
         assert cmd.target == "2330"
 
+        cmd_no_space = parse_command("加自選2330")
+        assert cmd_no_space.type == CommandType.ADD_WATCH
+        assert cmd_no_space.target == "2330"
+
     def test_list_watch(self):
         cmd = parse_command("自選")
         assert cmd.type == CommandType.LIST_WATCH

@@ -7,7 +7,7 @@
 import logging
 from collections.abc import Callable
 
-from commands import alert_service, watch_service
+from commands import alert_service, price_fetcher, watch_service
 from commands.models import CommandType, ParsedCommand
 from commands.parser import is_stock_code
 
@@ -44,22 +44,35 @@ def handle_help(_: ParsedCommand, __: str) -> str:
 
 def handle_query(command: ParsedCommand, _: str) -> str:
     """
-    處理查詢指令（第三階段實作股價 API，現為佔位）。
+    處理查詢指令。
     """
     target = command.target or ""
 
-    if is_stock_code(target):
-        logger.info("查詢指令：代號 %s", target)
-        return (
-            f"🔍 已收到查詢：{target}\n"
-            "（股價資料串接開發中，敬請期待）"
-        )
+    if not is_stock_code(target):
+        logger.info("查詢指令：非股票代號格式 %s", target)
+        return "目前僅支援以股票代號查詢，例如「查詢 2330」"
 
-    logger.info("查詢指令：名稱/關鍵字 %s", target)
-    return (
-        f"🔍 已收到查詢：{target}\n"
-        "（名稱對照與股價資料串接開發中，敬請期待）"
+    logger.info("查詢指令：代號 %s", target)
+    
+    result = price_fetcher.get_stock_price(target)
+    if result is None:
+        return f"查不到代號 {target} 的股價，請確認代號是否正確"
+
+    code = result.get("code", target)
+    name = result.get("name", "")
+    price = result.get("price", "無資料")
+    time_str = result.get("time", "無資料")
+    
+    reply = (
+        f"📈 {code} {name}".strip() + "\n"
+        f"當前價格：{price}\n"
+        f"資料時間：{time_str}"
     )
+
+    if not result.get("is_realtime", True):
+        reply += "\n⚠️ 此為非即時報價（盤後或休市），僅供參考"
+
+    return reply
 
 
 def handle_add_watch(command: ParsedCommand, line_user_id: str) -> str:

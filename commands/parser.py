@@ -23,18 +23,18 @@ COMMAND_PATTERNS: list[tuple[CommandType, Pattern[str]]] = [
     # 查詢股價：查詢 2330、查 台積電、q 2330
     (
         CommandType.QUERY,
-        re.compile(r"^(查詢|查|q|quote)\s+(.+)$", re.IGNORECASE),
+        re.compile(r"^(查詢|查)\s*(.+)$|^(q|quote)\s+(.+)$", re.IGNORECASE),
     ),
     # 加入自選股
     (
         CommandType.ADD_WATCH,
-        re.compile(r"^(加自選|加入|add|\+)\s+(.+)$", re.IGNORECASE),
+        re.compile(r"^(加自選|加入|\+)\s*(.+)$|^(add)\s+(.+)$", re.IGNORECASE),
     ),
     # 移除自選股
     (
         CommandType.REMOVE_WATCH,
         re.compile(
-            r"^(刪自選|移除|刪除|remove|del|-)\s+(.+)$",
+            r"^(刪自選|移除|刪除|-)\s*(.+)$|^(remove|del)\s+(.+)$",
             re.IGNORECASE,
         ),
     ),
@@ -49,9 +49,9 @@ COMMAND_PATTERNS: list[tuple[CommandType, Pattern[str]]] = [
 ALERT_LIST_PATTERN = re.compile(r"^(警示清單|alert list|alerts)$", re.IGNORECASE)
 CONFIRM_CLEAR_ALERTS_PATTERN = re.compile(r"^清空警示\s+confirm$", re.IGNORECASE)
 CLEAR_ALERTS_PATTERN = re.compile(r"^清空警示$")
-UPDATE_ALERT_PATTERN = re.compile(r"^改警示\s+(\d+)\s*([<>])\s*(\S+)$")
-DELETE_ALERT_PATTERN = re.compile(r"^刪警示\s+(\d+)$")
-ADD_ALERT_PATTERN = re.compile(r"^警示\s+(\d{4,6})\s*([<>])\s*(\S+)$")
+UPDATE_ALERT_PATTERN = re.compile(r"^改警示\s*(\d+)\s*([<>])\s*(\S+)$")
+DELETE_ALERT_PATTERN = re.compile(r"^刪警示\s*(\d+)$")
+ADD_ALERT_PATTERN = re.compile(r"^警示\s*(\d{4,6})\s*([<>])\s*(\S+)$")
 
 
 def normalize_text(text: str) -> str:
