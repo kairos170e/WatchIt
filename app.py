@@ -151,12 +151,13 @@ def handle_text_message(event: MessageEvent) -> None:
 
     line_user_id = getattr(event.source, "user_id", None)
 
+    quick_reply = None
     try:
         if not line_user_id:
             reply_text = "❌ 無法取得使用者資訊，請以個人聊天方式使用本 Bot。"
         else:
             command = parse_command(user_text)
-            reply_text = dispatch_command(command, line_user_id)
+            reply_text, quick_reply = dispatch_command(command, line_user_id)
             logger.info("指令類型：%s", command.type.value)
     except Exception:
         logger.exception("處理訊息時發生未預期錯誤")
@@ -167,11 +168,10 @@ def handle_text_message(event: MessageEvent) -> None:
         with ApiClient(line_configuration) as api_client:
             messaging_api = MessagingApi(api_client)
 
-            # 透過 Reply Message API 回覆（必須在收到事件的數秒內使用 reply_token）
             messaging_api.reply_message(
                 ReplyMessageRequest(
                     reply_token=event.reply_token,
-                    messages=[TextMessage(text=reply_text)],
+                    messages=[TextMessage(text=reply_text, quick_reply=quick_reply)],
                 )
             )
     except Exception:
