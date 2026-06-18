@@ -21,3 +21,5 @@ Thumbs.db
 
 # SQLite 資料庫
 watchit.db
+
+*.zip
