@@ -118,7 +118,7 @@ def start_scheduler(messaging_api: MessagingApi, interval_minutes: int = 5):
     _scheduler.add_job(
         check_alerts_job,
         trigger="interval",
-        minutes=interval_minutes,
+        seconds=int(os.environ.get("CHECK_INTERVAL_SECONDS", interval_minutes * 60)),
         args=[messaging_api],
         id="check_alerts_job",
         replace_existing=True,
